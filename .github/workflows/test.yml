@@ -1,0 +1,18 @@
+name: Step 1 Test
+on: workflow_dispatch
+
+jobs:
+  test-job:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+      - name: Install requests
+        run: pip install requests
+      - name: Run test script
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+        run: python arbitrage_bot.py
