@@ -1,18 +1,31 @@
-name: Step 1 Test
-on: workflow_dispatch
+name: Arbitrage Bot Schedule
+on:
+  schedule:
+    - cron: '*/15 * * * *'  # 每 15 分鐘執行一次
+  workflow_dispatch:      # 允許手動點擊執行
+
+permissions:
+  contents: write         # 關鍵：允許機器人寫入 sent_ids.json 到你的專案
 
 jobs:
-  test-job:
+  run-bot:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: '3.9'
-      - name: Install requests
-        run: pip install requests
-      - name: Run test script
+      - name: Install dependencies
+        run: pip install requests pandas beautifulsoup4 lxml openpyxl
+      - name: Run Arbitrage Bot
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
         run: python arbitrage_bot.py
+      - name: Commit and Push changes
+        run: |
+          git config --global user.name "github-actions"
+          git config --global user.email "action@github.com"
+          git add sent_ids.json
+          git commit -m "Update sent IDs" || exit 0
+          git push
